@@ -1,6 +1,6 @@
 import { StyleSheet, View, Text, Pressable } from "react-native";
-import { useState, useEffect, useRef } from "react";
-import DateTimePicker from '@react-native-community/datetimepicker';
+import { useState, useEffect } from "react";
+import { Calendar } from 'react-native-calendars';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { format } from "date-fns";
 
@@ -12,34 +12,38 @@ interface WeekContainerProps {
 export default function WeekContainer({ eventos, onDateSelect  }: WeekContainerProps) {
     const [currentDate, setCurrentDate] = useState(new Date());
     const [weekDays, setWeekDays] = useState<Date[]>([]);
-    const [showPicker, setShowPicker] = useState(false);
+    const [showCalendar, setShowCalendar] = useState(false);
     const [selectedDate, setSelectedDate] = useState(currentDate);
-    const [diasComEventos, setDiasComEventos] = useState<string[]>([]);
-    const eventosRef = useRef<string[]>([]); // Referência para evitar logs duplicados
+
+    const updateWeekDays = (date: Date) => {
+        const startOfWeek = new Date(date);
+        startOfWeek.setDate(date.getDate() - date.getDay());
+        const days: Date[] = [];
+        for (let i = 0; i < 7; i++) {
+            const day = new Date(startOfWeek);
+            day.setDate(startOfWeek.getDate() + i);
+            days.push(day);
+        }
+        setWeekDays(days);
+    };
 
     useEffect(() => {
-        const updateWeekDays = (date: Date) => {
-            const startOfWeek = new Date(date);
-            startOfWeek.setDate(date.getDate() - date.getDay());
-            const days: Date[] = [];
-            for (let i = 0; i < 7; i++) {
-                const day = new Date(startOfWeek);
-                day.setDate(startOfWeek.getDate() + i);
-                days.push(day);
-            }
-            setWeekDays(days);
-        };
-
+        // Atualiza os dias da semana sempre que currentDate mudar
         updateWeekDays(currentDate);
     }, [currentDate]);
 
+    useEffect(() => {
+        // Atualiza os dias da semana sempre que selectedDate mudar
+        updateWeekDays(selectedDate);
+    }, [selectedDate]);
+
     const handleCalendarPress = () => {
-        setShowPicker(true);
+        setShowCalendar(true);
     };
 
     const handleDateChange = (event: any, date?: Date) => {
+        console.log("Data selecionada:", date);
         if (date) {
-            console.log("Data Selecionada no Calendário:", format(date, "dd/MM/yyyy"));
             setSelectedDate(date);
             onDateSelect(format(date, "dd/MM/yyyy"));
 
@@ -54,29 +58,27 @@ export default function WeekContainer({ eventos, onDateSelect  }: WeekContainerP
                 setCurrentDate(startOfSelectedWeek);
             }
         }
-        setShowPicker(false);
+        setShowCalendar(false);
     };
 
-    useEffect(() => {
-        if (eventos && eventos.length > 0) {
-            const diasComEventos = eventos.map((evento) => {
-                if (evento.data) {
-                const [dia, mes, ano] = evento.data.split("/");
-                const formattedDate = new Date(parseInt(ano), parseInt(mes) - 1, parseInt(dia));
-                return !isNaN(formattedDate.getTime())
-                    ? format(formattedDate, "dd/MM/yyyy")
-                    : null;
-                }
-                return null;
-            })
-            .filter(Boolean) as string[];
+    const onDayPress = (day: { dateString: string }) => {
+        const [year, month, dayOfMonth] = day.dateString.split('-').map(Number);
+        const selected = new Date(year, month - 1, dayOfMonth, 12); // Define a hora para meio-dia
+        setSelectedDate(selected);
+        onDateSelect(format(selected, "dd/MM/yyyy"));
+        setCurrentDate(selected);
+        setShowCalendar(false);
+    };
 
-        if (JSON.stringify(diasComEventos) !== JSON.stringify(eventosRef.current)) {
-            setDiasComEventos(diasComEventos);
-            eventosRef.current = diasComEventos;
-            console.log("Datas de Todos os Eventos do Usuário:", eventos);
-            console.log("Datas dos Eventos Formatadas:", diasComEventos);
-        }}}, [eventos]);
+    const diasComEventos = eventos.map(evento => {
+        const [dia, mes, ano] = evento.data.split('/');
+        const formattedDate = new Date(parseInt(ano), parseInt(mes) - 1, parseInt(dia));
+        return formattedDate instanceof Date && !isNaN(formattedDate.getTime()) 
+            ? format(formattedDate, "dd/MM/yyyy") 
+            : null;
+    }).filter(Boolean);
+    console.log('Eventos:', eventos);
+    console.log('Dias com eventos formatados:', diasComEventos);
 
     return (
         <View style={styles.Container}>
@@ -120,13 +122,27 @@ export default function WeekContainer({ eventos, onDateSelect  }: WeekContainerP
                     <Icon name="calendar" size={25} color="white" />
             </Pressable>
 
-            {showPicker && (
-                <DateTimePicker
-                    value={selectedDate}
-                    mode="date"
-                    display="default"
-                    onChange={handleDateChange}
-                />
+            {showCalendar  && (
+                <Calendar
+                markedDates={eventos.reduce((acc, evento) => {
+                    const [dia, mes, ano] = evento.data.split('/');
+                    const formattedDate = `${ano}-${mes}-${dia}`;
+                    acc[formattedDate] = { marked: true, dotColor: 'purple' };
+                    return acc;
+                }, {} as { [key: string]: { marked: boolean; dotColor: string } })}
+                onDayPress={onDayPress}
+                theme={{
+                    todayTextColor: '#5271ff',
+                    selectedDayBackgroundColor: 'red',
+                    arrowColor: 'white',
+                    monthTextColor: 'white',
+                    textDayFontFamily: 'monospace',
+                    textMonthFontFamily: 'monospace',
+                    textDayFontSize: 16,
+                    textMonthFontSize: 18,
+                }}
+                style={styles.calendar}
+            />
             )}
         </View>
     );
@@ -198,5 +214,16 @@ const styles = StyleSheet.create({
         position: "absolute",
         left: 315,
         bottom: 23,
+    },
+    calendar: {
+        position: "absolute",
+        top: 20,
+        paddingBottom : 10,
+        backgroundColor: "#5271ff",
+        color: "white",
+        borderRadius: 10,
+        width: '80%',
+        zIndex: 1,
+        right: -150,
     },
 });

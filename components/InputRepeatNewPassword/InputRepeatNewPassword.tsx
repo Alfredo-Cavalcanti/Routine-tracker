@@ -19,7 +19,7 @@ function InputRepeatNewPassword () {
             secureTextEntry={!isPasswordVisible}
             value={password}
             onChangeText={setPassword}
-            placeholder="Repeat new password"
+            placeholder="Repetir Nova Senha"
             
             />
             <TouchableOpacity onPress={togglePasswordVisibility} style={styles.iconContainer}>

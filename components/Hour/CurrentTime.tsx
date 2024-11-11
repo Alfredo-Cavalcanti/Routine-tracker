@@ -1,31 +1,40 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, Pressable, Platform } from 'react-native';
+import DateTimePicker from '@react-native-community/datetimepicker';
 
-const CurrentTime = () => {
-  const [currentTime, setCurrentTime] = useState('');
+interface CurrentTimeProps {
+  onTimeChange: (time: Date) => void;
+  selectedTime: Date | null;}
 
-  useEffect(() => {
-    const updateCurrentTime = () => {
-      const now = new Date();
-      const formattedTime = now.toLocaleTimeString();
-      setCurrentTime(formattedTime);
-    };
+const CurrentTime: React.FC<CurrentTimeProps> = ({ onTimeChange, selectedTime }) => {
+  const [showPicker, setShowPicker] = useState(false);
 
-    const interval = setInterval(updateCurrentTime, 1000);
-
-    return () => clearInterval(interval);
-  }, []);
+  const handleTimeChange = (event: any, time?: Date) => {
+    if (Platform.OS === 'android') setShowPicker(false);
+    if (time) {
+      onTimeChange(time);}};
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.timeText}>{currentTime}</Text>
-    </View>
-  );
-};
+    <View>
+      <Pressable onPress={() => setShowPicker(true)} style={styles.container}>
+                <Text style={styles.timeText}>
+                    {selectedTime
+                        ? selectedTime.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+                        : "Definir Hora"}
+                </Text>
+            </Pressable>
+
+      {showPicker && (
+        <DateTimePicker
+          value={selectedTime || new Date()}
+          mode="time"
+          display="default"
+          onChange={handleTimeChange}/>)}
+    </View>);};
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#CCCDCF', // Cor cinza
+    backgroundColor: '#CCCDCF',
     padding: 10,
     borderRadius: 4,
   },

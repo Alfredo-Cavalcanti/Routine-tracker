@@ -1,4 +1,4 @@
-import React from "react";
+import { useState } from "react";
 import {Image, StyleSheet, Platform, View, Text, Pressable,} from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import PasswordBox from "@/components/PasswordBox/PasswordBox";
@@ -7,6 +7,8 @@ import ButtonLogin from "@/components/ButtonLogin/ButtonLogin";
 
 export default function LoginScreen() {
     const navigation = useNavigation();
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
 
     const handleRegisterPress = () => {
         navigation.navigate("register");
@@ -19,6 +21,7 @@ export default function LoginScreen() {
     return (
         <View style={styles.container}>
             <View style={styles.header}>
+                {/* Adiciona a logo no cabeçalho */}
                 <Image
                     source={require('@/assets/images/logo.png')}
                     style={styles.logo}
@@ -27,23 +30,23 @@ export default function LoginScreen() {
 
             <View style={styles.box}>
                 <View style={styles.stepContainerEmail}>
-                    <InputEmail />
+                    <InputEmail value={email} onChangeText={setEmail} />
                 </View>
                 <View style={styles.stepContainerPassword}>
-                    <PasswordBox />
+                    <PasswordBox value={password} onChangeText={setPassword} />
                 </View>
-                <Text style={styles.linkForgot} onPress={handleRecoverPasswordPress}>Forgot your password?</Text>
+                <Text style={styles.linkForgot} onPress={handleRecoverPasswordPress} >Esqueceu sua senha?</Text>
                 <View style={styles.stepButtonContainer}>
-                    <ButtonLogin />
+                    <ButtonLogin email={email} password={password} />
                 </View>
             </View>
 
-            <Text style={styles.linktext1}>Don't have an account?{" "}
-                <Text style={styles.link} onPress={handleRegisterPress}>Register</Text>
+            <Text style={styles.linktext1}>Não possui uma conta?{" "}
+                <Text style={styles.link} onPress={handleRegisterPress}>Cadastre-se</Text>
             </Text>
 
-            <Text style={styles.linktext2}>Forgot your password?{" "}
-                <Text style={styles.link} onPress={handleRecoverPasswordPress}>Recover</Text>
+            <Text style={styles.linktext2}>Esqueceu sua senha?{" "}
+                <Text style={styles.link} onPress={handleRecoverPasswordPress}>Recuperar</Text>
             </Text>
 
         </View>
@@ -61,19 +64,21 @@ const styles = StyleSheet.create({
         top: 0,
         left: 0,
         right: 0,
-        backgroundColor: "orange",
-        height: 75,
+        backgroundColor: "#5271ff",
+        height: 80,
         justifyContent: "center",
         alignItems: "center",
+        borderBottomLeftRadius: 20,
+        borderBottomRightRadius: 20,
     },
     logo: {
-        marginTop: 300,
-        width: 400,
+        marginTop: 320,
+        width: 300,
         height: 500,
         resizeMode: "contain",
     },
     box: {
-        marginTop: 149,
+        marginTop: 250,
         alignItems: "center",
         backgroundColor: "white",
     },
@@ -116,7 +121,7 @@ const styles = StyleSheet.create({
         marginRight: 70,
         marginTop: 0,
         fontSize: 13,
-        color: "orange",
+        color: "#5271ff",
         fontWeight: "bold",
     },
     linktext1: {
@@ -129,7 +134,7 @@ const styles = StyleSheet.create({
     },
     link: {
         fontSize: 16,
-        color: "orange",
+        color: "#5271ff",
         fontWeight: "bold",
     },
 });

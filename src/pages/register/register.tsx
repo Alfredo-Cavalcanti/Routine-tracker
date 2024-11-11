@@ -3,19 +3,21 @@ import { useNavigation } from '@react-navigation/native';
 import PasswordBox from "@/components/PasswordBox/PasswordBox";
 import InputEmail from "@/components/InputEmail/InputEmail";
 import ButtonRegister from "@/components/ButtonRegister/ButtonRegister";
-import React from "react";
-
+import { useState } from "react";
 
 export default function Register() {
-    const navigation = useNavigation();
+    const navigation = useNavigation(); // Inicialize o hook de navegação
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
 
     const handleLoginPress = () => {
-        navigation.navigate('login');
+      navigation.navigate('login'); // Navegue para a tela "Register"
     };
 
     return (
         <View style={styles.container}>
             <View style={styles.header}>
+                {/* Adiciona a logo no cabeçalho */}
                 <Image
                     source={require('@/assets/images/logo.png')}
                     style={styles.logo}
@@ -23,16 +25,16 @@ export default function Register() {
             </View>
             <View style={styles.box}>
                 <View style={styles.stepContainer}>
-                    <InputEmail />
+                    <InputEmail value={email} onChangeText={setEmail} />
                 </View>
                 <View style={styles.stepContainer}>
-                    <PasswordBox />
+                    <PasswordBox value={password} onChangeText={setPassword} />
                 </View>
                 <View style={styles.stepButtonContainer}>
-                    <ButtonRegister />
+                    <ButtonRegister email={email} password={password} />
                 </View>
             </View>
-            <Text style={styles.linktext}>Already have an account? <Text style={styles.link} onPress={handleLoginPress}>Login</Text></Text>
+            <Text style={styles.linktext}>Já tem uma conta? <Text style={styles.link} onPress={handleLoginPress}>Login</Text></Text>
         </View>
         
     );
@@ -49,19 +51,21 @@ const styles = StyleSheet.create({
         top: 0,
         left: 0,
         right: 0,
-        backgroundColor: "orange",
-        height: 75,
+        backgroundColor: "#5271ff",
+        height: 80,
         justifyContent: "center",
         alignItems: "center",
+        borderBottomLeftRadius: 20,
+        borderBottomRightRadius: 20,
     },
     logo: {
         marginTop: 300,
-        width: 400,
+        width: 300,
         height: 500,
         resizeMode: "contain",
     },
     box: {
-        marginTop: 125,
+        marginTop: 200,
         alignItems: "center",
         backgroundColor: "white",
     },
@@ -100,7 +104,7 @@ const styles = StyleSheet.create({
     },
     link: {
         fontSize: 16,
-        color: "orange",
+        color: "#5271ff",
         fontWeight: "bold",
     },
 });

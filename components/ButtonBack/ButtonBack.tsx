@@ -8,7 +8,7 @@ interface ButtonProps {
 const ButtonBack: React.FC<ButtonProps> = ({ onPress }) => {
   return (
     <TouchableOpacity style={styles.button} onPress={onPress}>
-      <Text style={styles.text}>Back</Text>
+      <Text style={styles.text}>VOLTAR</Text>
     </TouchableOpacity>
   );
 };
@@ -16,7 +16,7 @@ const ButtonBack: React.FC<ButtonProps> = ({ onPress }) => {
 const styles = StyleSheet.create({
   button: {
     marginTop: 30,
-    backgroundColor: 'orange',
+    backgroundColor: '#5271ff',
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 4,

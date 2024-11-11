@@ -1,45 +1,53 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, StyleSheet, Dimensions, ScrollView } from "react-native";
 import { PieChart } from "react-native-chart-kit";
-import { db } from "../../firebase/config_firebase";
-import { collection, getDocs } from "firebase/firestore";
+import { db, auth } from "../../firebase/config_firebase";
+import { collection, onSnapshot } from "firebase/firestore";
 
 export default function PixChart() {
   const [approvedCount, setApprovedCount] = useState(0);
   const [failedCount, setFailedCount] = useState(0);
 
   useEffect(() => {
-    const fetchTransacoes = async () => {
-      const querySnapshot = await getDocs(collection(db, "eventos"));
-      let approved = 0;
-      let failed = 0;
+    const user = auth.currentUser;
 
-      querySnapshot.forEach((doc) => {
-        const data = doc.data();
-        if (data.status === true) {
-          approved += 1;
-        } else if (data.status === false) {
-          failed += 1;
-        }
+    if (user && user.email) {
+      const userCollectionRef = collection(db, user.email);
+
+      const unsubscribe = onSnapshot(userCollectionRef, (snapshot) => {
+        let approved = 0;
+        let failed = 0;
+
+        snapshot.forEach((doc) => {
+          const data = doc.data();
+          if (data.status === true) {
+            approved += 1;
+          } else if (data.status === false) {
+            failed += 1;
+          }
+        });
+
+        setApprovedCount(approved);
+        setFailedCount(failed);
       });
 
-      setApprovedCount(approved);
-      setFailedCount(failed);
-    };
-
-    fetchTransacoes();
+      // Limpar a assinatura ao desmontar o componente
+      return () => unsubscribe();
+    } else {
+      console.warn("Usuário não autenticado.");
+    }
   }, []);
 
   const screenWidth = Dimensions.get("window").width;
 
   const pieChartData = [
     {
-      name: "Realized",
+      name: "Realizado",
       count: approvedCount,
       color: "#4CAF50",
     },
     {
-      name: "Not Realized",
+      name: "Não Realizado",
       count: failedCount,
       color: "#FF5252",
     },
@@ -52,9 +60,9 @@ export default function PixChart() {
       </View>
 
       <ScrollView contentContainerStyle={styles.scrollViewContent}>
-        <Text style={styles.title}>Realized x Not realized</Text>
+        <Text style={styles.title}>Realizado x Não Realizados</Text>
         <Text style={styles.subtitle}>
-          Percentage of realized and not realized habits throughout app use
+          Percentual de hábitos realizados e não realizados ao longo do uso
         </Text>
 
         <View style={[styles.chartContainer, { width: screenWidth * 0.9 }]}>
@@ -100,12 +108,13 @@ const styles = StyleSheet.create({
     top: 0,
     left: 0,
     right: 0,
-    backgroundColor: "orange",
-    height: 75,
+    backgroundColor: "#5271ff",
+    height: 80,
     justifyContent: "center",
     alignItems: "center",
-    zIndex: 1,
-  },
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
+ },
   headerText: {
     fontSize: 18,
     fontWeight: "bold",

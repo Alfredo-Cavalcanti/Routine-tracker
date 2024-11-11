@@ -19,7 +19,7 @@ function InputNewPassword () {
             secureTextEntry={!isPasswordVisible}
             value={password}
             onChangeText={setPassword}
-            placeholder="Type new password"
+            placeholder="Digitar Nova Senha"
             
             />
             <TouchableOpacity onPress={togglePasswordVisibility} style={styles.iconContainer}>
